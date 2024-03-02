@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/categories")
+@RequestMapping("${api.prefix}/categories")
 public class CategoryController {
     @GetMapping() //http://localhost:8080/api/v1/categories?page=1&limit=10
     public ResponseEntity<String> getAllCategories(
@@ -21,9 +21,11 @@ public class CategoryController {
     }
 
     @PostMapping()//neu tham so truyen vao la 1 doi tuong ? => Data Transfer Object = Request Object
-    public ResponseEntity<?> createCategories(@Valid @RequestBody CategoryDTO categoryDTO, BindingResult bindingResult){
+    public ResponseEntity<?> createCategories(@Valid @RequestBody CategoryDTO categoryDTO,
+                                              BindingResult bindingResult){
         if(bindingResult.hasErrors()){
-            List<String> errorMessage = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+            List<String> errorMessage = bindingResult.getFieldErrors().stream()
+                                        .map(FieldError::getDefaultMessage).toList();
             return ResponseEntity.badRequest().body(errorMessage);
         }
         return ResponseEntity.ok("create"+categoryDTO);
