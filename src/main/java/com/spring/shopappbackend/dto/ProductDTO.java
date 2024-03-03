@@ -2,12 +2,18 @@ package com.spring.shopappbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProductDTO {
     @NotBlank(message = "name cannot be emty")
     @Size(min = 3,max = 200,message = "must between 3 and 200")
@@ -21,7 +27,5 @@ public class ProductDTO {
     private String des;
 
     @JsonProperty("category_id")
-    private String categoryId;
-
-    private List<MultipartFile> files;
+    private Long categoryId;
 }

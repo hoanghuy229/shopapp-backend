@@ -1,7 +1,14 @@
 package com.spring.shopappbackend.controller;
 
 import com.spring.shopappbackend.dto.ProductDTO;
+import com.spring.shopappbackend.dto.ProductImageDTO;
+import com.spring.shopappbackend.exception.DataNotFoundException;
+import com.spring.shopappbackend.model.Product;
+import com.spring.shopappbackend.model.ProductImage;
+import com.spring.shopappbackend.service.IProductService;
+import com.spring.shopappbackend.service.ProductService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +29,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("${api.prefix}/products")
+@RequiredArgsConstructor
 public class ProductController {
+    private final IProductService iProductService;
 
     @GetMapping() //http://localhost:8080/api/v1/products?page=1&limit=10
     public ResponseEntity<String> getProducts(
@@ -42,8 +51,8 @@ public class ProductController {
         return ResponseEntity.ok(String.format("delete product with id =%d success",id));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createProduct(@Valid @ModelAttribute ProductDTO productDTO,
+    @PostMapping()
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO productDTO,
                                            BindingResult bindingResult
                                             ){
         try{
@@ -54,33 +63,55 @@ public class ProductController {
 
                 return ResponseEntity.badRequest().body(errorMessage);
             }
-            List<MultipartFile> files = productDTO.getFiles();
+            Product newProduct = iProductService.createProduct(productDTO);
 
-            files = files == null ? new ArrayList<MultipartFile>() : files;
-
-            for(MultipartFile file :files){
-                    //check if file = "" continue to next loop
-                    if(file.getSize() == 0){
-                        continue;
-                    }
-                    //check image file
-                    if(file.getSize() >10*1024*1024){ //10MB
-                        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("file too large");
-                    }
-
-                    //check file type
-                    String contentType = file.getContentType();
-                    if(contentType == null || !contentType.startsWith("image/")){
-                        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("not image");
-                    }
-                    //save file and update thumbnail in DTO
-                    String filename = storeFile(file);
-            }
-
-            return ResponseEntity.ok("okok");
+            return ResponseEntity.ok(newProduct);
 
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "uploads/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImages(@PathVariable("id") long id,@ModelAttribute("files") List<MultipartFile> files){
+
+        try {
+            Product existProduct = iProductService.getProductById(id);
+
+            files = files == null ? new ArrayList<MultipartFile>() : files;
+            List<ProductImage> productImages = new ArrayList<>();
+
+            for(MultipartFile file :files){
+                //check if file = "" continue to next loop
+                if(file.getSize() == 0){
+                    continue;
+                }
+                //check image file
+                if(file.getSize() >10*1024*1024){ //10MB
+                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("file too large");
+                }
+
+                //check file type
+                String contentType = file.getContentType();
+                if(contentType == null || !contentType.startsWith("image/")){
+                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("not image");
+                }
+                try {
+                //save file and update thumbnail in DTO
+                String filename = storeFile(file);
+
+                    ProductImage productImage = iProductService.createProductImages(existProduct.getId(),
+                            ProductImageDTO.builder()
+                                    .imageUrl(filename)
+                                    .build());
+                    productImages.add(productImage);
+                } catch (Exception e) {
+                    return ResponseEntity.badRequest().body(e.getMessage());
+                }
+            }
+            return ResponseEntity.ok().body(productImages);
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
