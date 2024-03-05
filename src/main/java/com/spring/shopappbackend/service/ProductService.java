@@ -10,7 +10,9 @@ import com.spring.shopappbackend.model.ProductImage;
 import com.spring.shopappbackend.repository.CategoryRepository;
 import com.spring.shopappbackend.repository.ProductImageRepository;
 import com.spring.shopappbackend.repository.ProductRepository;
+import com.spring.shopappbackend.response.ProductResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class ProductService implements IProductService{
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
+    private final ModelMapper modelMapper;
 
 
     @Override
@@ -34,6 +37,7 @@ public class ProductService implements IProductService{
                 .name(productDTO.getName())
                 .price(productDTO.getPrice())
                 .thumbnail(productDTO.getThumbnail())
+                .des(productDTO.getDes())
                 .category(existCate)
                 .build();
         return productRepository.save(newproduct);
@@ -45,8 +49,9 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public Page<Product> getAllProducts(PageRequest pageRequest) {
-        return productRepository.findAll(pageRequest);
+    public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
+        Page<Product> products = productRepository.findAll(pageRequest);
+        return products.map(product -> modelMapper.map(product,ProductResponse.class));
     }
 
     @Override
@@ -81,7 +86,7 @@ public class ProductService implements IProductService{
 
     @Override
     public ProductImage createProductImages(long id, ProductImageDTO productImageDTO) throws Exception {
-        Product existProduct = productRepository.findById(productImageDTO.getProductId())
+        Product existProduct = productRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("cannot find product with id"));
 
         ProductImage newPImage = ProductImage.builder()
@@ -90,7 +95,7 @@ public class ProductService implements IProductService{
                 .build();
 
         int size = productImageRepository.findByProductId(id).size();
-        if(size > 5){
+        if(size > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
             throw new InvalidParamException("Number of images must <= 5");
         }
         return productImageRepository.save(newPImage);

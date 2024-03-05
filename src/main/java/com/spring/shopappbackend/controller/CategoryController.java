@@ -33,13 +33,17 @@ public class CategoryController {
         return ResponseEntity.ok("create category successfully!!!");
     }
 
-    @GetMapping() //http://localhost:8080/api/v1/categories?page=1&limit=10
-    public ResponseEntity<List<Category>> getAllCategories(
-            @RequestParam("page") int page,
-            @RequestParam("limit") int limit
-    ){
+    @GetMapping()
+    public ResponseEntity<List<Category>> getAllCategories(){
         List<Category> categories = iCategoryService.getAllCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getById(@PathVariable long id){
+        Category category = iCategoryService.getCategoryById(id);
+        return ResponseEntity.ok(category);
+
     }
 
 

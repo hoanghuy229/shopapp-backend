@@ -1,14 +1,20 @@
 package com.spring.shopappbackend.controller;
 
+import com.github.javafaker.Faker;
 import com.spring.shopappbackend.dto.ProductDTO;
 import com.spring.shopappbackend.dto.ProductImageDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.Product;
 import com.spring.shopappbackend.model.ProductImage;
+import com.spring.shopappbackend.response.ProductListResponse;
+import com.spring.shopappbackend.response.ProductResponse;
 import com.spring.shopappbackend.service.IProductService;
-import com.spring.shopappbackend.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +24,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -32,23 +38,43 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
     private final IProductService iProductService;
+    private final ModelMapper modelMapper;
 
-    @GetMapping() //http://localhost:8080/api/v1/products?page=1&limit=10
-    public ResponseEntity<String> getProducts(
+    @GetMapping() //http://localhost:8080/api/v1/products?page=0&limit=10
+    public ResponseEntity<ProductListResponse> getProducts(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit
     ){
-        return ResponseEntity.ok(String.format("get all products,page = %d,limit = %d",page,limit));
+        //get page and number of element in page and sort from newest to oldest
+        PageRequest pageRequest = PageRequest.of(page,limit, Sort.by("createdAt").descending());
+        Page<ProductResponse> productPage = iProductService.getAllProducts(pageRequest);
+        //get total page
+        int totalPages = productPage.getTotalPages();
+        List<ProductResponse> products = productPage.getContent();
+        return ResponseEntity.ok(ProductListResponse.builder().products(products).totalPages(totalPages).build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<String> getProductById(@PathVariable("id") String productId){
-        return ResponseEntity.ok("ok "+productId);
+    public ResponseEntity<?> getProductById(@PathVariable("id") Long productId) throws DataNotFoundException {
+        Product exist = iProductService.getProductById(productId);
+        return ResponseEntity.ok(modelMapper.map(exist,ProductResponse.class));
+        //return ResponseEntity.ok(ProductResponse.fromProduct(exist));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable long id){
+    public ResponseEntity<String> deleteProduct(@PathVariable long id) throws DataNotFoundException {
+        iProductService.deleteProduct(id);
         return ResponseEntity.ok(String.format("delete product with id =%d success",id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProduct(
+            @PathVariable long id,
+            @Valid @RequestBody ProductDTO productDTO) throws DataNotFoundException {
+
+            Product product = iProductService.updateProduct(id,productDTO);
+            return ResponseEntity.ok(product);
+
     }
 
     @PostMapping()
@@ -73,12 +99,17 @@ public class ProductController {
     }
 
     @PostMapping(value = "uploads/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadImages(@PathVariable("id") long id,@ModelAttribute("files") List<MultipartFile> files){
+    public ResponseEntity<?> uploadImages(@PathVariable("id") long id,
+                                          @ModelAttribute("files") List<MultipartFile> files){
 
         try {
             Product existProduct = iProductService.getProductById(id);
 
             files = files == null ? new ArrayList<MultipartFile>() : files;
+            if(files.size() > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
+                return ResponseEntity.badRequest().body("< than 5 img");
+            }
+
             List<ProductImage> productImages = new ArrayList<>();
 
             for(MultipartFile file :files){
@@ -115,8 +146,8 @@ public class ProductController {
         }
     }
 
-    private String storeFile(MultipartFile file) throws IOException{
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+    private String storeFile(MultipartFile file) throws Exception {
+        String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         //change file name to be unique
         String uniqueFileName = UUID.randomUUID().toString() + "_" + filename;
         //link to images storage
@@ -132,4 +163,23 @@ public class ProductController {
         return uniqueFileName;
     }
 
+    //@PostMapping("/generateFakeProducts")
+//    public ResponseEntity<String> generateFakeProducts() throws DataNotFoundException {
+//        Faker faker = new Faker();
+//        for(int i=0; i<100000;i++){
+//            String productName = faker.commerce().productName();
+//            if(iProductService.existsByName(productName)){
+//                continue;
+//            }
+//            ProductDTO productDTO = ProductDTO.builder()
+//                    .name(productName)
+//                    .price((float)faker.number().numberBetween(10,50_000_000))
+//                    .des(faker.lorem().sentence())
+//                    .thumbnail("")
+//                    .categoryId((long)faker.number().numberBetween(2,4))
+//                    .build();
+//            iProductService.createProduct(productDTO);
+//        }
+//        return ResponseEntity.ok("fake success");
+//    }
 }
