@@ -2,6 +2,8 @@ package com.spring.shopappbackend.controller;
 
 import com.spring.shopappbackend.dto.UserDTO;
 import com.spring.shopappbackend.dto.UserLoginDTO;
+import com.spring.shopappbackend.exception.DataNotFoundException;
+import com.spring.shopappbackend.exception.InvalidParamException;
 import com.spring.shopappbackend.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +48,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO){
-        String token = iUserService.login(userLoginDTO.getPhoneNumber(),userLoginDTO.getPassword());
-        return ResponseEntity.ok("token");
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO)  {
+        try {
+            String token = iUserService.login(userLoginDTO.getPhoneNumber(),userLoginDTO.getPassword());
+            return ResponseEntity.ok(token);
+        } catch (DataNotFoundException | InvalidParamException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }

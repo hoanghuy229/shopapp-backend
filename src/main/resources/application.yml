@@ -13,10 +13,21 @@ spring:
         hibernate:
           dialect: org.hibernate.dialect.MySQL8Dialect
           form_sql: true
+
+
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
+
+
 api:
   prefix: api/v1
+
+
+
+jwt:
+  expiration: 2592000000 #30 days: 30 days * 24 hours * 60 min * 60 sec * 1000 millisecond
+  secretKey: 9oBo17NXniHYE+kVglvIxHDdRAanr6dh2SMB+Bsg2n0=

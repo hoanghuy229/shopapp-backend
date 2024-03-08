@@ -3,6 +3,7 @@ package com.spring.shopappbackend.controller;
 import com.spring.shopappbackend.dto.OrderDetailDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.OrderDetail;
+import com.spring.shopappbackend.response.OrderDetailResponse;
 import com.spring.shopappbackend.service.IOrderDetailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,19 +22,19 @@ public class OrderDetailController {
 
     @PostMapping()
     public ResponseEntity<?> createOrderDetail(@Valid @RequestBody OrderDetailDTO orderDetailDTO) throws DataNotFoundException {
-        OrderDetail o = iOrderDetailService.createOrderDetail(orderDetailDTO);
+        OrderDetailResponse o = iOrderDetailService.createOrderDetail(orderDetailDTO);
         return ResponseEntity.ok(o);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderDetail(@Valid @PathVariable long id) throws DataNotFoundException {
-        OrderDetail o = iOrderDetailService.getOrderDetail(id);
+        OrderDetailResponse o = iOrderDetailService.getOrderDetail(id);
         return ResponseEntity.ok(o);
     }
 
     @GetMapping("/order/{orderId}") //get list order details of order
     public ResponseEntity<?> getOrderDetails(@Valid @PathVariable("orderId") Long orderId){
-        List<OrderDetail> o = iOrderDetailService.getListOrderDetail(orderId);
+        List<OrderDetailResponse> o = iOrderDetailService.getListOrderDetail(orderId);
         return ResponseEntity.ok(o);
     }
 
@@ -41,8 +42,9 @@ public class OrderDetailController {
     public ResponseEntity<?> updateOrderDetail(
             @Valid @PathVariable long id,
             @RequestBody OrderDetailDTO orderDetailDTO
-    ){
-        return ResponseEntity.ok("update order detail "+id+", orderDetailDTO: "+orderDetailDTO);
+    ) throws DataNotFoundException {
+        OrderDetailResponse orderDetailResponse = iOrderDetailService.updateOrderDetail(id,orderDetailDTO);
+        return ResponseEntity.ok(orderDetailResponse);
     }
 
     @DeleteMapping("/{id}")
