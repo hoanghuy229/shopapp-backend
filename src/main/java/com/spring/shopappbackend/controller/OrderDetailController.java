@@ -2,9 +2,9 @@ package com.spring.shopappbackend.controller;
 
 import com.spring.shopappbackend.dto.OrderDetailDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
-import com.spring.shopappbackend.model.OrderDetail;
 import com.spring.shopappbackend.response.OrderDetailResponse;
 import com.spring.shopappbackend.service.IOrderDetailService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -3,6 +3,7 @@ package com.spring.shopappbackend.controller;
 import com.spring.shopappbackend.dto.CategoryDTO;
 import com.spring.shopappbackend.model.Category;
 import com.spring.shopappbackend.service.ICategoryService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("${api.prefix}/categories")
@@ -48,9 +50,9 @@ public class CategoryController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable Long id,@Valid @RequestBody CategoryDTO categoryDTO){
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO categoryDTO, HttpServletRequest request){
         iCategoryService.updateCategory(id,categoryDTO);
-        return ResponseEntity.ok("update category successfully");
+        return ResponseEntity.ok("success");
     }
 
     @DeleteMapping("/{id}")

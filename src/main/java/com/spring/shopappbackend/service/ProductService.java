@@ -95,7 +95,7 @@ public class ProductService implements IProductService{
                 .build();
 
         int size = productImageRepository.findByProductId(id).size();
-        if(size > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
+        if(size >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT + 1){
             throw new InvalidParamException("Number of images must <= 5");
         }
         return productImageRepository.save(newPImage);

@@ -14,8 +14,6 @@ spring:
           dialect: org.hibernate.dialect.MySQL8Dialect
           form_sql: true
 
-
-
   servlet:
     multipart:
       max-file-size: 10MB

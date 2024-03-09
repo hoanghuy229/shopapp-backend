@@ -12,6 +12,7 @@ import com.spring.shopappbackend.service.IProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -107,7 +108,7 @@ public class ProductController {
 
             files = files == null ? new ArrayList<MultipartFile>() : files;
             if(files.size() > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
-                return ResponseEntity.badRequest().body("< than 5 img");
+                return ResponseEntity.badRequest().body("<= 5 img");
             }
 
             List<ProductImage> productImages = new ArrayList<>();
@@ -143,6 +144,22 @@ public class ProductController {
             return ResponseEntity.ok().body(productImages);
         } catch (DataNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<?> viewImage(@PathVariable String imageName){
+        try {
+            java.nio.file.Path imagePath = Paths.get("uploads/"+imageName);
+            UrlResource resource = new UrlResource(imagePath.toUri());
+            if(resource.exists()){
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
+            }
+            else{
+                return ResponseEntity.notFound().build();
+            }
+        }catch (Exception e){
+            return ResponseEntity.notFound().build();
         }
     }
 
