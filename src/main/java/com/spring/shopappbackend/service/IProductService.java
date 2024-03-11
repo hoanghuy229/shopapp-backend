@@ -9,12 +9,16 @@ import com.spring.shopappbackend.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+
 public interface IProductService {
     Product createProduct(ProductDTO productDTO) throws DataNotFoundException;
-    Product getProductById(long id) throws DataNotFoundException;
-    Page<ProductResponse> getAllProducts(PageRequest pageRequest);
+    ProductResponse getProductById(long id) throws DataNotFoundException;
+    Page<ProductResponse> getAllProducts(String keyword,Long categoryId,PageRequest pageRequest);
     Product updateProduct(long id,ProductDTO productDTO) throws DataNotFoundException;
     void deleteProduct(long id) throws DataNotFoundException;
     boolean existsByName(String name);
+    List<ProductResponse> findProductByIds(List<Long> productIds);
+    Product findById(long id) throws Exception;
     ProductImage createProductImages(long id, ProductImageDTO productImageDTO) throws Exception;
 }

@@ -29,10 +29,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("${api.prefix}/products")
@@ -41,14 +39,16 @@ public class ProductController {
     private final IProductService iProductService;
     private final ModelMapper modelMapper;
 
-    @GetMapping() //http://localhost:8080/api/v1/products?page=0&limit=10
+    @GetMapping() //http://localhost:8080/api/v1/products?page=0&category_id=0&limit=10&keyword=''
     public ResponseEntity<ProductListResponse> getProducts(
-            @RequestParam("page") int page,
-            @RequestParam("limit") int limit
+            @RequestParam(defaultValue = "",name = "keyword") String keyword,
+            @RequestParam(defaultValue = "0",name = "category_id") Long categoryId,
+            @RequestParam(defaultValue = "0",name = "page") int page,
+            @RequestParam(defaultValue = "10",name = "limit") int limit
     ){
         //get page and number of element in page and sort from newest to oldest
-        PageRequest pageRequest = PageRequest.of(page,limit, Sort.by("createdAt").descending());
-        Page<ProductResponse> productPage = iProductService.getAllProducts(pageRequest);
+        PageRequest pageRequest = PageRequest.of(page,limit, Sort.by("id").ascending());
+        Page<ProductResponse> productPage = iProductService.getAllProducts(keyword,categoryId,pageRequest);
         //get total page
         int totalPages = productPage.getTotalPages();
         List<ProductResponse> products = productPage.getContent();
@@ -57,9 +57,8 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable("id") Long productId) throws DataNotFoundException {
-        Product exist = iProductService.getProductById(productId);
-        return ResponseEntity.ok(modelMapper.map(exist,ProductResponse.class));
-        //return ResponseEntity.ok(ProductResponse.fromProduct(exist));
+        ProductResponse exist = iProductService.getProductById(productId);
+        return ResponseEntity.ok(exist);
     }
 
     @DeleteMapping("/{id}")
@@ -76,6 +75,19 @@ public class ProductController {
             Product product = iProductService.updateProduct(id,productDTO);
             return ResponseEntity.ok(product);
 
+    }
+
+    @GetMapping("/by-ids") //vd: 1,2,3,6,7,8
+    public ResponseEntity<?> getProductsByIds(@RequestParam("ids") String ids){
+        try{
+            //biến chuỗi ids thành danh sách productIds có kiểu Long
+            List<Long> productIds = Arrays.stream(ids.split(",")).map(Long::parseLong).toList();
+            List<ProductResponse> productResponses = iProductService.findProductByIds(productIds);
+            return ResponseEntity.ok(productResponses);
+        }
+        catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping()
@@ -101,10 +113,10 @@ public class ProductController {
 
     @PostMapping(value = "uploads/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadImages(@PathVariable("id") long id,
-                                          @ModelAttribute("files") List<MultipartFile> files){
+                                          @ModelAttribute("files") List<MultipartFile> files) throws Exception {
 
         try {
-            Product existProduct = iProductService.getProductById(id);
+            Product existProduct = iProductService.findById(id);
 
             files = files == null ? new ArrayList<MultipartFile>() : files;
             if(files.size() > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
@@ -132,7 +144,7 @@ public class ProductController {
                 //save file and update thumbnail in DTO
                 String filename = storeFile(file);
 
-                    ProductImage productImage = iProductService.createProductImages(existProduct.getId(),
+                    ProductImage productImage = iProductService.createProductImages(id,
                             ProductImageDTO.builder()
                                     .imageUrl(filename)
                                     .build());
@@ -156,7 +168,8 @@ public class ProductController {
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
             }
             else{
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
+                                     .body(new UrlResource(Paths.get("uploads/notfound.jpg").toUri()));
             }
         }catch (Exception e){
             return ResponseEntity.notFound().build();

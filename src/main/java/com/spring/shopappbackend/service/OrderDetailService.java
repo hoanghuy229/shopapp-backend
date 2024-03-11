@@ -12,6 +12,7 @@ import com.spring.shopappbackend.response.OrderDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class OrderDetailService implements IOrderDetailService{
 
 
     @Override
+    @Transactional
     public OrderDetailResponse createOrderDetail(OrderDetailDTO orderDetailDTO) throws DataNotFoundException {
         Order order = orderRepository.findById(orderDetailDTO.getOrderId()).orElseThrow(() -> new DataNotFoundException("cannot find order "));
         Product product = productRepository.findById(orderDetailDTO.getProductId()).orElseThrow(() -> new DataNotFoundException("cannot find product"));
@@ -49,6 +51,7 @@ public class OrderDetailService implements IOrderDetailService{
     }
 
     @Override
+    @Transactional
     public OrderDetailResponse updateOrderDetail(long id, OrderDetailDTO orderDetailDTO) throws DataNotFoundException {
         OrderDetail existOrderDetail = orderDetailRepository.findById(id).orElseThrow(() -> new DataNotFoundException("cannot find order detail"));
         Product product = productRepository.findById(orderDetailDTO.getProductId()).orElseThrow(()-> new DataNotFoundException("cannot find product"));
@@ -66,6 +69,7 @@ public class OrderDetailService implements IOrderDetailService{
     }
 
     @Override
+    @Transactional
     public void deleteOrderDetail(long id) {
         orderDetailRepository.deleteById(id);
 

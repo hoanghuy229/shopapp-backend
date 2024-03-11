@@ -3,6 +3,8 @@ package com.spring.shopappbackend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Table(name = "products")
 @Entity
 @Data
