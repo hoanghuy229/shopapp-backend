@@ -2,10 +2,12 @@ package com.spring.shopappbackend.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.spring.shopappbackend.model.OrderDetail;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -51,4 +53,7 @@ public class OrderResponse  {
 
     @JsonProperty("active")
     private Boolean active;
+
+    @JsonProperty("order_details")
+    private List<OrderDetailResponse> orderDetailIds;
 }

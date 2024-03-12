@@ -1,7 +1,6 @@
-package com.spring.shopappbackend.response;
+package com.spring.shopappbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,17 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderDetailResponse {
-    @JsonProperty("id")
-    private Long id;
+public class CartDTO {
 
     @JsonProperty("product_id")
     private Long productId;
 
-    @JsonProperty("price")
-    private Float price;
-
-    @JsonProperty("number_of_products")
-    private int numberOfProducts;
-
+    @JsonProperty("quantity")
+    private int quantity;
 }

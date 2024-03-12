@@ -39,12 +39,12 @@ public class ProductController {
     private final IProductService iProductService;
     private final ModelMapper modelMapper;
 
-    @GetMapping() //http://localhost:8080/api/v1/products?page=0&category_id=0&limit=10&keyword=''
+    @GetMapping() //http://localhost:8080/api/v1/products?page=0&category_id=0&limit=12&keyword=''
     public ResponseEntity<ProductListResponse> getProducts(
             @RequestParam(defaultValue = "",name = "keyword") String keyword,
             @RequestParam(defaultValue = "0",name = "category_id") Long categoryId,
             @RequestParam(defaultValue = "0",name = "page") int page,
-            @RequestParam(defaultValue = "10",name = "limit") int limit
+            @RequestParam(defaultValue = "12",name = "limit") int limit
     ){
         //get page and number of element in page and sort from newest to oldest
         PageRequest pageRequest = PageRequest.of(page,limit, Sort.by("id").ascending());

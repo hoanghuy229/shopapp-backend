@@ -2,6 +2,7 @@ package com.spring.shopappbackend.controller;
 
 import com.spring.shopappbackend.dto.OrderDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
+import com.spring.shopappbackend.model.Order;
 import com.spring.shopappbackend.response.OrderResponse;
 import com.spring.shopappbackend.service.IOrderService;
 
@@ -31,8 +32,8 @@ public class OrderController {
 
                 return ResponseEntity.badRequest().body(errorMessage);
             }
-            OrderResponse orderResponse = iOrderService.createOrder(orderDTO);
-            return ResponseEntity.ok(orderResponse);
+            String response = iOrderService.createOrder(orderDTO);
+            return ResponseEntity.ok().body(response);
         }
         catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
