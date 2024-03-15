@@ -1,9 +1,6 @@
 package com.spring.shopappbackend.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.spring.shopappbackend.model.Product;
-import com.spring.shopappbackend.model.ProductImage;
-import com.spring.shopappbackend.repository.ProductImageResponse;
 import lombok.*;
 
 import java.util.ArrayList;

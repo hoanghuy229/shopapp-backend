@@ -9,14 +9,13 @@ import com.spring.shopappbackend.model.Product;
 import com.spring.shopappbackend.model.ProductImage;
 import com.spring.shopappbackend.repository.CategoryRepository;
 import com.spring.shopappbackend.repository.ProductImageRepository;
-import com.spring.shopappbackend.repository.ProductImageResponse;
+import com.spring.shopappbackend.response.ProductImageResponse;
 import com.spring.shopappbackend.repository.ProductRepository;
 import com.spring.shopappbackend.response.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

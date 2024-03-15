@@ -1,4 +1,4 @@
-package com.spring.shopappbackend.repository;
+package com.spring.shopappbackend.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.spring.shopappbackend.model.Product;
