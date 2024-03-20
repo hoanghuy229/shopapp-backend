@@ -93,6 +93,28 @@ public class OrderService implements IOrderService {
     }
 
     @Override
+    public List<OrderResponse> getAll(Long userId) {
+        List<Order> orders = orderRepository.findByUserId(userId);
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
+            List<OrderDetail> orderDetails = order.getOrderDetails();
+            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+
+            for (OrderDetail orderDetail : orderDetails) {
+                OrderDetailResponse orderDetailResponse = modelMapper.map(orderDetail, OrderDetailResponse.class);
+                orderDetailResponses.add(orderDetailResponse);
+            }
+
+            orderResponse.setOrderDetailIds(orderDetailResponses);
+            orderResponses.add(orderResponse);
+        }
+
+        return orderResponses;
+
+    }
+
+    @Override
     @Transactional
     public OrderResponse updateOrder(long id, OrderDTO orderDTO) throws DataNotFoundException {
         Order order = orderRepository.findById(id).orElseThrow(() -> new DataNotFoundException("cannot find order"));
@@ -118,11 +140,5 @@ public class OrderService implements IOrderService {
             order.setActive(false);
             orderRepository.save(order);
         }
-    }
-
-    @Override
-    public List<OrderResponse> getAll(Long userId) {
-        List<Order> orders = orderRepository.findByUserId(userId);
-        return orders.stream().map(order -> modelMapper.map(order,OrderResponse.class)).toList();
     }
 }

@@ -38,6 +38,7 @@ public class JwtTokenUtil {
         //this.generateSecretKey();
         //thêm vào là phoneNumber, được lấy từ đối tượng User
         claims.put("phoneNumber",user.getPhoneNumber());
+        claims.put("userId",user.getId());
 
         try {
             //tạo JWT

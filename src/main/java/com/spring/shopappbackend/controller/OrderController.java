@@ -3,11 +3,14 @@ package com.spring.shopappbackend.controller;
 import com.spring.shopappbackend.dto.OrderDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.Order;
+import com.spring.shopappbackend.model.User;
 import com.spring.shopappbackend.response.OrderResponse;
 import com.spring.shopappbackend.service.IOrderService;
 
+import com.spring.shopappbackend.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -20,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final IOrderService iOrderService;
-
+    private final IUserService iUserService;
 
 
     @PostMapping()
@@ -52,8 +55,14 @@ public class OrderController {
     }
 
     @GetMapping("/user/{user_id}")
-    public ResponseEntity<?> getOrdersByUserId(@Valid @PathVariable("user_id") Long userId){
+    public ResponseEntity<?> getOrdersByUserId(@RequestHeader("Authorization") String token,
+                                               @Valid @PathVariable("user_id") Long userId){
         try {
+            String extractToken = token.substring(7);
+            User user = iUserService.getUserDetailFromToken(extractToken);// xác thực user
+            if(user.getId() != userId){// kiểm tra user đang xem orders của mình hay của người khác
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); //403
+            }
             List<OrderResponse> orders = iOrderService.getAll(userId);
             return ResponseEntity.ok(orders);
         }

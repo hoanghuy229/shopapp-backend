@@ -1,21 +1,21 @@
 package com.spring.shopappbackend.controller;
 
-import com.spring.shopappbackend.dto.UserDTO;
-import com.spring.shopappbackend.dto.UserLoginDTO;
+import com.spring.shopappbackend.dto.*;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.exception.InvalidParamException;
+import com.spring.shopappbackend.model.User;
+import com.spring.shopappbackend.response.UserResponse;
+import com.spring.shopappbackend.service.ITwilioService;
 import com.spring.shopappbackend.service.IUserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,6 +25,8 @@ import java.util.List;
 public class UserController {
 
     private final IUserService iUserService;
+    private final ModelMapper modelMapper;
+    private final ITwilioService iTwilioService;
 
 
     @PostMapping("/register")
@@ -56,4 +58,78 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("login failed");
         }
     }
+
+    @PostMapping("/details")
+    public ResponseEntity<UserResponse> getUserDetail(@RequestHeader("Authorization") String token){
+        try{
+            String extractToken = token.substring(7);
+            User user = iUserService.getUserDetailFromToken(extractToken);
+            UserResponse userResponse = new UserResponse();
+            modelMapper.map(user, userResponse);
+            return ResponseEntity.ok().body(userResponse);
+        }
+        catch(Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/details/{id}")
+    public ResponseEntity<UserResponse> updateUserDetails(@PathVariable("id") Long id,
+                                                          @RequestHeader("Authorization") String token,
+                                                          @RequestBody UpdateUserDTO updateUserDTO){
+        try{
+            String extractToken = token.substring(7);
+            User user = iUserService.getUserDetailFromToken(extractToken); // xác thực user
+            if(user.getId() != id){ // kiểm tra user đang sửa thông tin của mình hay của người khác
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); //403
+            }
+            User updateUser = iUserService.updateUser(id,updateUserDTO);
+            UserResponse userResponse = new UserResponse();
+            modelMapper.map(updateUser, userResponse);
+            return ResponseEntity.ok().body(userResponse);
+        }
+        catch (Exception e){
+           return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/otp/forgetPassword")
+    public ResponseEntity<?> forgetPassword(@RequestBody PhoneNumberDTO phoneNumberDTO) {
+        try {
+            String result = iUserService.checkPhoneNumber(phoneNumberDTO.getPhoneNumber());
+            String sendOtp = iTwilioService.sendOTP(phoneNumberDTO.getPhoneNumber());
+            return ResponseEntity.ok().body(sendOtp);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PostMapping("/otp/validateOtp")
+    public ResponseEntity<?> validateOtp(@RequestParam("otp") String otp, @RequestBody PhoneNumberDTO phoneNumberDTO) {
+        try {
+            String result = iTwilioService.validateOtp(otp, phoneNumberDTO.getPhoneNumber());
+            return ResponseEntity.ok().body(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PostMapping("/otp/resetPassword")
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordDTO passwordDTO,
+                                           @RequestParam("phone_number") String phoneNumber,
+                                           @RequestParam("otp")String otp) {
+        try {
+            if(!passwordDTO.getRePassword().equals(passwordDTO.getPassword())){
+                return ResponseEntity.badRequest().body("password not match!!!");
+            }
+            String result = iTwilioService.validateOtp(otp, phoneNumber);
+            iTwilioService.deleteOtp(otp);
+            iUserService.resetPassword(passwordDTO,phoneNumber);
+            return ResponseEntity.ok().body("change password success");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
 }

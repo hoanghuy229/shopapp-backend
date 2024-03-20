@@ -29,3 +29,9 @@ api:
 jwt:
   expiration: 2592000000 #30 days: 30 days * 24 hours * 60 min * 60 sec * 1000 millisecond
   secretKey: 9oBo17NXniHYE+kVglvIxHDdRAanr6dh2SMB+Bsg2n0=
+
+
+twilio:
+  accountSid: AC4035f8058daec4653fa539fa0324fcfa
+  authToken: ce549b13564728d8db5a9d196dc0bd65
+  phoneNumber: +14242926164

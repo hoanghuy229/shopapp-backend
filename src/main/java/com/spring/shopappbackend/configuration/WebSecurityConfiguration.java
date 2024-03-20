@@ -35,10 +35,12 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.GET,Endpoints.PUBLIC_GET_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST,Endpoints.PUBLIC_POST_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET,Endpoints.ADMIN_USER_GET_ENDPOINTS).hasAnyRole("ADMIN","USER")
+                        .requestMatchers(HttpMethod.POST,Endpoints.ADMIN_USER_POST_ENDPOINTS).hasAnyRole("ADMIN","USER")
                         .requestMatchers(HttpMethod.POST,Endpoints.ADMIN_POST_ENDPOINTS).hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,Endpoints.ADMIN_PUT_ENDPOINTS).hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,Endpoints.ADMIN_DELETE_ENDPOINTS).hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,Endpoints.USER_POST_ENDPOINTS).hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT,Endpoints.USER_PUT_ENDPOINTS).hasRole("USER")
                         .anyRequest().authenticated();
             });
         http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {

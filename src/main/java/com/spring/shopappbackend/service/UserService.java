@@ -1,6 +1,9 @@
 package com.spring.shopappbackend.service;
 
 import com.spring.shopappbackend.component.JwtTokenUtil;
+import com.spring.shopappbackend.dto.PasswordDTO;
+import com.spring.shopappbackend.dto.PhoneNumberDTO;
+import com.spring.shopappbackend.dto.UpdateUserDTO;
 import com.spring.shopappbackend.dto.UserDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.exception.InvalidParamException;
@@ -54,6 +57,7 @@ public class UserService implements IUserService{
                 .googleAccountId(userDTO.getGoogleAccountId())
                 .build();
 
+        newUser.setActive(true);
         newUser.setRole(role);
         //check account id , if dont have require password
         if(userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0){
@@ -76,6 +80,15 @@ public class UserService implements IUserService{
                throw new BadCredentialsException("invalid information !!!");
            }
         }
+
+        Optional<Role> optionalRole = roleRepository.findById(existUser.getRole().getId());
+        if(optionalRole.isEmpty()){
+            throw new DataNotFoundException("role doesn't existed");
+        }
+        if(!existUser.isActive()){
+            throw new DataNotFoundException("your account banned");
+        }
+
         //store phoneNumber and Pass and role
         UsernamePasswordAuthenticationToken authenticationToken =  new UsernamePasswordAuthenticationToken(
                 phoneNumber,password,existUser.getAuthorities());
@@ -83,5 +96,67 @@ public class UserService implements IUserService{
         //authenticate user info
         authenticationManager.authenticate(authenticationToken);
         return jwtTokenUtil.generateToken(existUser); //create token JWT for user and return
+    }
+
+    @Override
+    public User getUserDetailFromToken(String token) throws Exception{
+        if(jwtTokenUtil.isTokenExpired(token)){
+            throw new Exception("token is expired");
+        }
+        String phoneNumber = jwtTokenUtil.extractPhoneNumber(token);
+        Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
+        if(user.isPresent()){
+            return user.get();
+        }
+        else{
+            throw new Exception("user not found");
+        }
+    }
+
+    @Override
+    @Transactional
+    public User updateUser(Long id, UpdateUserDTO updateUserDTO) throws Exception {
+        // Find the existing user by userId
+        User existUser = userRepository.findById(id).orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        // Update user information based on the DTO
+        if (updateUserDTO.getFullName() != null) {
+            existUser.setFullName(updateUserDTO.getFullName());
+        }
+        if (updateUserDTO.getAddress() != null) {
+            existUser.setAddress(updateUserDTO.getAddress());
+        }
+        if (updateUserDTO.getDateOfBirth() != null) {
+            existUser.setDateOfBirth(updateUserDTO.getDateOfBirth());
+        }
+        if (updateUserDTO.getFacebookAccountId() > 0) {
+            existUser.setFacebookAccountId(updateUserDTO.getFacebookAccountId());
+        }
+        if (updateUserDTO.getGoogleAccountId() > 0) {
+            existUser.setGoogleAccountId(updateUserDTO.getGoogleAccountId());
+        }
+
+        return userRepository.save(existUser);
+    }
+
+    public String checkPhoneNumber(String phoneNumber) throws Exception{
+        boolean result = userRepository.existsByPhoneNumber(phoneNumber);
+        if(!result){
+            return "phone number doesn't existed !!!";
+        }
+        return "phone number founded !!!";
+    }
+
+    @Override
+    public void resetPassword(PasswordDTO passwordDTO,String phoneNumber) throws Exception {
+        // Lấy thông tin người dùng từ DTO
+        User user = userRepository.findByPhoneNumber(phoneNumber).orElseThrow(() -> new DataNotFoundException("User not found"));
+        String newPassword = passwordDTO.getPassword();
+        if (user == null) {
+            throw new Exception("User not found");
+        }
+        // Đặt mật khẩu mới cho người dùng và lưu vào cơ sở dữ liệu
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }
