@@ -97,8 +97,8 @@ public class UserController {
     public ResponseEntity<?> forgetPassword(@RequestBody PhoneNumberDTO phoneNumberDTO) {
         try {
             String result = iUserService.checkPhoneNumber(phoneNumberDTO.getPhoneNumber());
-            String sendOtp = iTwilioService.sendOTP(phoneNumberDTO.getPhoneNumber());
-            return ResponseEntity.ok().body(sendOtp);
+            iTwilioService.sendOTP(phoneNumberDTO.getPhoneNumber());
+            return ResponseEntity.ok().body("success");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

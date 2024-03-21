@@ -4,6 +4,7 @@ import com.spring.shopappbackend.configuration.TwilioConfiguration;
 import com.spring.shopappbackend.model.OneTimePassword;
 import com.spring.shopappbackend.repository.OtpRepository;
 import com.twilio.Twilio;
+import com.twilio.converter.Promoter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.twilio.rest.api.v2010.account.Message;
@@ -18,7 +19,7 @@ public class TwilioService implements ITwilioService {
     private final TwilioConfiguration twilioConfiguration;
     private final OtpRepository otpRepository;
 
-    public String sendOTP(String phoneNumber) {
+    public void sendOTP(String phoneNumber) {
         String format = "+84" + phoneNumber.substring(1);
         PhoneNumber to = new PhoneNumber(format);
         PhoneNumber from = new PhoneNumber(twilioConfiguration.getTrialNumber());
@@ -30,8 +31,12 @@ public class TwilioService implements ITwilioService {
 
         // Lưu OTP cùng với thời gian hết hạn vào cơ sở dữ liệu
         OneTimePassword newOtp = new OneTimePassword(phoneNumber, otpInt, calculateExpiryTime());
+        OneTimePassword oldOtp = otpRepository.findByPhoneNumber(phoneNumber);
+        if(oldOtp != null){
+            otpRepository.delete(oldOtp);
+        }
         otpRepository.save(newOtp);
-        return otp;
+
     }
 
     @Override
