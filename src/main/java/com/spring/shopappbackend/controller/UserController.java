@@ -4,6 +4,7 @@ import com.spring.shopappbackend.dto.*;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.exception.InvalidParamException;
 import com.spring.shopappbackend.model.User;
+import com.spring.shopappbackend.response.UserListResponse;
 import com.spring.shopappbackend.response.UserResponse;
 import com.spring.shopappbackend.service.ITwilioService;
 import com.spring.shopappbackend.service.IUserService;
@@ -11,6 +12,9 @@ import com.spring.shopappbackend.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -27,6 +31,20 @@ public class UserController {
     private final IUserService iUserService;
     private final ModelMapper modelMapper;
     private final ITwilioService iTwilioService;
+
+    @GetMapping("/admin/getAll")
+    public ResponseEntity<UserListResponse> getAllUser(
+            @RequestParam(defaultValue = "0",name = "page")  int page,
+            @RequestParam(defaultValue = "12",name = "limit") int limit,
+            @RequestParam(defaultValue = "",name = "keyword") String keyword){
+
+        PageRequest pageRequest = PageRequest.of(page,limit, Sort.by("id").ascending());
+        Page<UserResponse> userResponsePage = iUserService.findByKeyword(keyword,pageRequest);
+        int totalPage = userResponsePage.getTotalPages();
+        List<UserResponse> userResponses = userResponsePage.getContent();
+        return ResponseEntity.ok(UserListResponse.builder().userResponses(userResponses).totalPages(totalPage).build());
+
+    }
 
 
     @PostMapping("/register")

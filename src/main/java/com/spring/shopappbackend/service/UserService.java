@@ -12,8 +12,12 @@ import com.spring.shopappbackend.model.Role;
 import com.spring.shopappbackend.model.User;
 import com.spring.shopappbackend.repository.RoleRepository;
 import com.spring.shopappbackend.repository.UserRepository;
+import com.spring.shopappbackend.response.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +35,7 @@ public class UserService implements IUserService{
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final AuthenticationManager authenticationManager;
+    private final ModelMapper modelMapper;
 
 
     @Override //register
@@ -158,5 +163,13 @@ public class UserService implements IUserService{
         // Đặt mật khẩu mới cho người dùng và lưu vào cơ sở dữ liệu
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    public Page<UserResponse> findByKeyword(String keyword, PageRequest pageRequest) {
+        Page<User> users = userRepository.findByKeyword(keyword,pageRequest);
+        return users.map(user -> {
+            return modelMapper.map(user,UserResponse.class);
+        });
     }
 }

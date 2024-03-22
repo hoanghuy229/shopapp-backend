@@ -7,7 +7,6 @@ public class Endpoints {
             "api/v1/categories",
             "api/v1/roles",
             "api/v1/products/images/*",
-            "api/v1/orders/{id}"
     };
     public static String[] PUBLIC_POST_ENDPOINTS = {
             "api/v1/users/register",
@@ -23,7 +22,8 @@ public class Endpoints {
             "api/v1/users/details",
     };
     public static String[] ADMIN_GET_ENDPOINTS = {
-
+            "api/v1/orders/admin/get-orders-admin",
+            "api/v1/users/admin/getAll"
     };
     public static String[] ADMIN_POST_ENDPOINTS = {
             "api/v1/products",

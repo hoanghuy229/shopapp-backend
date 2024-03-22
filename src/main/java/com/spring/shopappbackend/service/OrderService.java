@@ -12,6 +12,8 @@ import com.spring.shopappbackend.response.OrderDetailResponse;
 import com.spring.shopappbackend.response.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -141,4 +143,26 @@ public class OrderService implements IOrderService {
             orderRepository.save(order);
         }
     }
+
+    @Override
+    public Page<OrderResponse> getOrdersByKeyword(String keyword, PageRequest pageRequest) {
+        Page<Order> orderPage = orderRepository.findByKeyword(keyword, pageRequest);
+
+        // Ánh xạ từng phần tử trong trang Page<Order> sang OrderResponse
+        Page<OrderResponse> orderResponsePage = orderPage.map(order -> {
+            OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
+
+            List<OrderDetail> orderDetails = order.getOrderDetails();
+            List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+            for (OrderDetail orderDetail : orderDetails) {
+                orderDetailResponses.add(modelMapper.map(orderDetail, OrderDetailResponse.class));
+            }
+
+            orderResponse.setOrderDetailIds(orderDetailResponses);
+            return orderResponse;
+        });
+
+        return orderResponsePage;
+    }
+
 }

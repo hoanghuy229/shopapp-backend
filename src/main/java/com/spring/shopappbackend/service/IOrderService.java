@@ -4,6 +4,8 @@ import com.spring.shopappbackend.dto.OrderDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.Order;
 import com.spring.shopappbackend.response.OrderResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -13,4 +15,5 @@ public interface IOrderService {
     OrderResponse updateOrder(long id,OrderDTO orderDTO) throws DataNotFoundException;
     void deleteOrder(long id);
     List<OrderResponse> getAll(Long userId);
+    Page<OrderResponse> getOrdersByKeyword(String keyword, PageRequest pageRequest);
 }

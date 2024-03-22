@@ -5,11 +5,15 @@ import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.Order;
 import com.spring.shopappbackend.model.User;
 import com.spring.shopappbackend.response.OrderResponse;
+import com.spring.shopappbackend.response.OrdersListResponse;
 import com.spring.shopappbackend.service.IOrderService;
 
 import com.spring.shopappbackend.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -89,4 +93,16 @@ public class OrderController {
         return ResponseEntity.ok("delete orders of user " + id);
     }
 
+    @GetMapping("/admin/get-orders-admin")
+    public ResponseEntity<OrdersListResponse> getAllOrders(
+            @RequestParam(defaultValue = "0",name = "page")  int page,
+            @RequestParam(defaultValue = "12",name = "limit") int limit,
+            @RequestParam(defaultValue = "",name = "keyword") String keyword){
+
+        PageRequest pageRequest = PageRequest.of(page,limit,Sort.by("id").ascending());
+        Page<OrderResponse> orderResponsePage = iOrderService.getOrdersByKeyword(keyword,pageRequest);
+        int totalPages = orderResponsePage.getTotalPages();
+        List<OrderResponse> orderResponseList = orderResponsePage.getContent();
+        return ResponseEntity.ok(OrdersListResponse.builder().orderResponses(orderResponseList).totalPages(totalPages).build());
+    }
 }
