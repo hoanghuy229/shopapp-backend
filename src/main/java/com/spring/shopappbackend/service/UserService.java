@@ -82,16 +82,16 @@ public class UserService implements IUserService{
         User existUser = user.get();
         if(existUser.getFacebookAccountId() == 0 && existUser.getGoogleAccountId() == 0){
            if(!passwordEncoder.matches(password,existUser.getPassword())){
-               throw new BadCredentialsException("invalid information !!!");
+               throw new DataNotFoundException("invalid information !!!");
            }
         }
 
         Optional<Role> optionalRole = roleRepository.findById(existUser.getRole().getId());
         if(optionalRole.isEmpty()){
-            throw new DataNotFoundException("role doesn't existed");
+            throw new DataNotFoundException("role doesn't existed !!!");
         }
         if(!existUser.isActive()){
-            throw new DataNotFoundException("your account banned");
+            throw new DataNotFoundException("your account is banned !!!");
         }
 
         //store phoneNumber and Pass and role
@@ -115,6 +115,19 @@ public class UserService implements IUserService{
         }
         else{
             throw new Exception("user not found");
+        }
+    }
+
+    @Override
+    public void solfDeleteUser(Long id) throws Exception {
+        User existUser = userRepository.findById(id).orElseThrow(() -> new DataNotFoundException("User not found"));
+        if(existUser.isActive()){
+            existUser.setActive(false);
+            userRepository.save(existUser);
+        }
+        else{
+            existUser.setActive(true);
+            userRepository.save(existUser);
         }
     }
 

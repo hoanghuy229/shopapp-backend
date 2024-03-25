@@ -2,6 +2,7 @@ package com.spring.shopappbackend.service;
 
 import com.spring.shopappbackend.dto.CartDTO;
 import com.spring.shopappbackend.dto.OrderDTO;
+import com.spring.shopappbackend.dto.UpdateOrderDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.*;
 import com.spring.shopappbackend.repository.OrderDetailRepository;
@@ -118,21 +119,16 @@ public class OrderService implements IOrderService {
 
     @Override
     @Transactional
-    public OrderResponse updateOrder(long id, OrderDTO orderDTO) throws DataNotFoundException {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new DataNotFoundException("cannot find order"));
-        User existUser = userRepository.findById(orderDTO.getUserId()).orElseThrow(() -> new DataNotFoundException("cannot find order"));
-        modelMapper.typeMap(OrderDTO.class,Order.class).addMappings(mapper -> mapper.skip(Order::setId));
-        modelMapper.map(orderDTO,order);
-        LocalDate shippingDate = orderDTO.getShippingDate() == null ? LocalDate.now():orderDTO.getShippingDate();
-        if(shippingDate.isBefore(LocalDate.now())){
-            throw new DataNotFoundException("date at least today");
-        }
-        order.setShippingDate(shippingDate);
-        order.setUser(existUser);
-        orderRepository.save(order);
-        return modelMapper.map(order,OrderResponse.class);
-    }
+    public OrderResponse updateOrder(long orderId, UpdateOrderDTO updateOrderDTO) throws DataNotFoundException {
+        // Kiểm tra xem Order có tồn tại không
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new DataNotFoundException("Cannot find order"));
 
+        // Cập nhật các trường của Order từ DTO
+        modelMapper.map(updateOrderDTO, order);
+
+        // Lưu và trả về Order đã được cập nhật
+        return modelMapper.map(orderRepository.save(order), OrderResponse.class);
+    }
     @Override
     @Transactional
     public void deleteOrder(long id) {

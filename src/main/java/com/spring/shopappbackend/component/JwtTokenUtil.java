@@ -97,8 +97,11 @@ public class JwtTokenUtil {
     }
 
     //kiểm tra token hợp lệ không
-    public boolean validateToken(String token, UserDetails userDetails){
+    public boolean validateToken(String token, User userDetails){
         String phoneNumber = extractPhoneNumber(token);
+        if(!userDetails.isActive()){
+            return false;
+        }
         return (phoneNumber.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 

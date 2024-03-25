@@ -1,6 +1,7 @@
 package com.spring.shopappbackend.controller;
 
 import com.spring.shopappbackend.dto.OrderDTO;
+import com.spring.shopappbackend.dto.UpdateOrderDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.Order;
 import com.spring.shopappbackend.model.User;
@@ -77,11 +78,15 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOrder(
-            @Valid @PathVariable long id,
-            @Valid @RequestBody OrderDTO orderDTO
-    ) throws DataNotFoundException {
-        OrderResponse o = iOrderService.updateOrder(id,orderDTO);
-        return ResponseEntity.ok(o);
+            @Valid @PathVariable("id") long orderId,
+            @Valid @RequestBody UpdateOrderDTO updateOrderDTO
+    ) {
+        try {
+            OrderResponse order = iOrderService.updateOrder(orderId, updateOrderDTO);
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

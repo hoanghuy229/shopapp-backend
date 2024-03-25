@@ -73,7 +73,7 @@ public class UserController {
             String token = iUserService.login(userLoginDTO.getPhoneNumber(),userLoginDTO.getPassword());
             return ResponseEntity.ok(token);
         } catch (DataNotFoundException | InvalidParamException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("login failed");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -108,6 +108,23 @@ public class UserController {
         }
         catch (Exception e){
            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<?> adminDeleteUser(@PathVariable("id") Long id,
+                                             @RequestHeader("Authorization") String token){
+        try{
+            String extractToken = token.substring(7);
+            User admin = iUserService.getUserDetailFromToken(extractToken); // xác thực phải là admin không
+            if(admin.getRole().getId() != 1){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); //403 không có quyền admin
+            }
+            iUserService.solfDeleteUser(id);
+            return ResponseEntity.ok().body("successfully");
+        }
+        catch(Exception e){
+            return ResponseEntity.badRequest().build();
         }
     }
 

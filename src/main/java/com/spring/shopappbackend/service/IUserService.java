@@ -15,12 +15,17 @@ import org.springframework.data.domain.PageRequest;
 
 public interface IUserService {
     User createUser(UserDTO userDTO) throws DataNotFoundException, PermissionException;
+
     String login(String phoneNumber, String password) throws DataNotFoundException, InvalidParamException;
 
     User getUserDetailFromToken(String token) throws Exception;
 
+    void solfDeleteUser(Long id) throws Exception;
+
     User updateUser(Long id, UpdateUserDTO updateUserDTO) throws Exception;
+
     String checkPhoneNumber(String phoneNumber) throws Exception;
+
     void resetPassword(PasswordDTO passwordDTO, String phoneNumber) throws Exception;
 
     Page<UserResponse> findByKeyword(String keyword, PageRequest pageRequest);
