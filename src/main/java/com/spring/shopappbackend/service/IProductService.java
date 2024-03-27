@@ -8,6 +8,7 @@ import com.spring.shopappbackend.model.ProductImage;
 import com.spring.shopappbackend.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface IProductService {
     List<ProductResponse> findProductByIds(List<Long> productIds);
     Product findById(long id) throws Exception;
     ProductImage createProductImages(long id, ProductImageDTO productImageDTO) throws Exception;
+
+    Page<ProductResponse> getCarousel(PageRequest pageRequest);
 }

@@ -27,7 +27,7 @@ api:
 
 
 jwt:
-  expiration: 2592000000 #30 days: 30 days * 24 hours * 60 min * 60 sec * 1000 millisecond
+  expiration: 2592000 #30 days: 30 days * 24 hours * 60 min * 60 sec
   secretKey: 9oBo17NXniHYE+kVglvIxHDdRAanr6dh2SMB+Bsg2n0=
 
 

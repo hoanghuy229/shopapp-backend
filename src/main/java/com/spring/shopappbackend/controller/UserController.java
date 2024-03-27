@@ -6,6 +6,7 @@ import com.spring.shopappbackend.exception.InvalidParamException;
 import com.spring.shopappbackend.model.User;
 import com.spring.shopappbackend.response.UserListResponse;
 import com.spring.shopappbackend.response.UserResponse;
+import com.spring.shopappbackend.service.ITokenService;
 import com.spring.shopappbackend.service.ITwilioService;
 import com.spring.shopappbackend.service.IUserService;
 
@@ -31,6 +32,7 @@ public class UserController {
     private final IUserService iUserService;
     private final ModelMapper modelMapper;
     private final ITwilioService iTwilioService;
+    private final ITokenService iTokenService;
 
     @GetMapping("/admin/getAll")
     public ResponseEntity<UserListResponse> getAllUser(
@@ -68,13 +70,22 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO userLoginDTO)  {
+    public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO userLoginDTO,
+                                        @RequestHeader("User-Agent") String userAgent)  {
         try {
             String token = iUserService.login(userLoginDTO.getPhoneNumber(),userLoginDTO.getPassword());
+            User user = iUserService.getUserDetailFromToken(token);
+            iTokenService.addToken(user,token,isMobileDevice(userAgent));
             return ResponseEntity.ok(token);
         } catch (DataNotFoundException | InvalidParamException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private boolean isMobileDevice(String userAgent){
+        return userAgent.toLowerCase().contains("mobile");// Kiểm tra User-Agent header để xác định thiết bị di động
     }
 
     @PostMapping("/details")

@@ -52,7 +52,8 @@ public class User extends BaseModel implements UserDetails {
     @JoinColumn(name = "role_id")
     private Role role;
 
-
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 
 
 

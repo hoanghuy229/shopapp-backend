@@ -3,6 +3,7 @@ package com.spring.shopappbackend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Table(name = "products")
@@ -34,4 +35,10 @@ public class Product extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<ProductImage> productImages;
+
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 }

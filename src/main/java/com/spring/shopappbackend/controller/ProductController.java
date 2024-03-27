@@ -54,6 +54,16 @@ public class ProductController {
         List<ProductResponse> products = productPage.getContent();
         return ResponseEntity.ok(ProductListResponse.builder().products(products).totalPages(totalPages).build());
     }
+    @GetMapping("/carousel")
+    public ResponseEntity<?> getCarousel(
+            @RequestParam(defaultValue = "0",name = "page") int page,
+            @RequestParam(defaultValue = "3",name = "limit") int limit
+    ){
+        PageRequest pageRequest = PageRequest.of(page,limit, Sort.by("id").descending());
+        Page<ProductResponse> productPage = iProductService.getCarousel(pageRequest);
+        List<ProductResponse> products = productPage.getContent();
+        return ResponseEntity.ok(ProductListResponse.builder().products(products).build());
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable("id") Long productId) throws DataNotFoundException {

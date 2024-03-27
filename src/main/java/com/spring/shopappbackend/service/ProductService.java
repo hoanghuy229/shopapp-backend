@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,5 +119,11 @@ public class ProductService implements IProductService{
             throw new InvalidParamException("Number of images must <= 5");
         }
         return productImageRepository.save(newPImage);
+    }
+
+    @Override
+    public Page<ProductResponse> getCarousel(PageRequest pageRequest) {
+        Page<Product> products = productRepository.getCarousel(pageRequest);
+        return products.map(product -> modelMapper.map(product,ProductResponse.class));
     }
 }

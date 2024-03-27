@@ -71,11 +71,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         //tạo ra list Pair chứa các url(first) và method(second) không cần xác thực jwt
         final List<Pair<String,String>> bypassTokens = Arrays.asList(
                 Pair.of(String.format("%s/products",apiPrefix),"GET"),
+                Pair.of(String.format("%s/products/carousel",apiPrefix),"GET"),
                 Pair.of(String.format("%s/categories",apiPrefix),"GET"),
                 Pair.of(String.format("%s/users/register",apiPrefix),"POST"),
                 Pair.of(String.format("%s/users/login",apiPrefix),"POST"),
                 Pair.of(String.format("%s/users/otp",apiPrefix),"POST"),
-                Pair.of(String.format("%s/roles",apiPrefix),"GET")
+                Pair.of(String.format("%s/roles",apiPrefix),"GET"),
+                Pair.of(String.format("%s/comments",apiPrefix),"GET")
         );
         //lặp qua từng http request
         for(Pair<String,String> bypassToken : bypassTokens){

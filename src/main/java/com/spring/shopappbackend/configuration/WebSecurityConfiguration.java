@@ -40,6 +40,7 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT,Endpoints.ADMIN_PUT_ENDPOINTS).hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,Endpoints.ADMIN_DELETE_ENDPOINTS).hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,Endpoints.ADMIN_GET_ENDPOINTS).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,Endpoints.USER_DELETE_ENDPOINTS).hasRole("USER")
                         .requestMatchers(HttpMethod.POST,Endpoints.USER_POST_ENDPOINTS).hasRole("USER")
                         .requestMatchers(HttpMethod.PUT,Endpoints.USER_PUT_ENDPOINTS).hasRole("USER")
                         .anyRequest().authenticated();

@@ -1,7 +1,9 @@
 package com.spring.shopappbackend.component;
 
 import com.spring.shopappbackend.exception.InvalidParamException;
+import com.spring.shopappbackend.model.Token;
 import com.spring.shopappbackend.model.User;
+import com.spring.shopappbackend.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -29,6 +31,8 @@ public class JwtTokenUtil {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
+    private final TokenRepository tokenRepository;
+
 
     // tạo token JWT dựa trên thông tin của một đối tượng người dùng
     public String generateToken(User user) throws InvalidParamException {
@@ -45,7 +49,7 @@ public class JwtTokenUtil {
             String token = Jwts.builder()
                 .setClaims(claims)
                 .setSubject(user.getPhoneNumber())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration *1000L))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
             return token;
@@ -99,7 +103,8 @@ public class JwtTokenUtil {
     //kiểm tra token hợp lệ không
     public boolean validateToken(String token, User userDetails){
         String phoneNumber = extractPhoneNumber(token);
-        if(!userDetails.isActive()){
+        Token existingToken = tokenRepository.findByToken(token);
+        if(!userDetails.isActive() || existingToken == null || existingToken.isRevoked()){
             return false;
         }
         return (phoneNumber.equals(userDetails.getUsername()) && !isTokenExpired(token));

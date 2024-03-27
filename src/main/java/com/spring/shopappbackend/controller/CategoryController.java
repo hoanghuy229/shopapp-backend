@@ -3,7 +3,6 @@ package com.spring.shopappbackend.controller;
 import com.spring.shopappbackend.dto.CategoryDTO;
 import com.spring.shopappbackend.model.Category;
 import com.spring.shopappbackend.service.ICategoryService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +49,7 @@ public class CategoryController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO categoryDTO, HttpServletRequest request){
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO categoryDTO){
         iCategoryService.updateCategory(id,categoryDTO);
         return ResponseEntity.ok("success");
     }

@@ -3,10 +3,12 @@ package com.spring.shopappbackend.configuration;
 public class Endpoints {
     public static String[] PUBLIC_GET_ENDPOINTS = {
             "api/v1/products",
+            "api/v1/products/carousel",
             "api/v1/products/{id}",
             "api/v1/categories",
             "api/v1/roles",
             "api/v1/products/images/*",
+            "api/v1/comments"
     };
     public static String[] PUBLIC_POST_ENDPOINTS = {
             "api/v1/users/register",
@@ -49,12 +51,14 @@ public class Endpoints {
     };
     public static String[] USER_POST_ENDPOINTS = {
             "api/v1/orders",
-            "api/v1/order-details"
+            "api/v1/order-details",
+            "api/v1/comments"
     };
     public static String[] USER_PUT_ENDPOINTS = {
-            "api/v1/users/details/{id}"
+            "api/v1/users/details/{id}",
+            "api/v1/comments/{id}"
     };
     public static String[] USER_DELETE_ENDPOINTS = {
-
+            "api/v1/comments/{id}"
     };
 }
