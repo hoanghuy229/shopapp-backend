@@ -5,10 +5,7 @@ import com.spring.shopappbackend.dto.OrderDTO;
 import com.spring.shopappbackend.dto.UpdateOrderDTO;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.model.*;
-import com.spring.shopappbackend.repository.OrderDetailRepository;
-import com.spring.shopappbackend.repository.OrderRepository;
-import com.spring.shopappbackend.repository.ProductRepository;
-import com.spring.shopappbackend.repository.UserRepository;
+import com.spring.shopappbackend.repository.*;
 import com.spring.shopappbackend.response.OrderDetailResponse;
 import com.spring.shopappbackend.response.OrderResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +31,7 @@ public class OrderService implements IOrderService {
     private final ModelMapper modelMapper;
     private final ProductRepository productRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final CouponRepository couponRepository;
 
 
     @Override
@@ -42,7 +40,7 @@ public class OrderService implements IOrderService {
         User user = userRepository.findById(orderDTO.getUserId()).orElseThrow(() -> new DataNotFoundException("cannot find user"));
         //convert orderDTO => order
         //use Model Mapper
-        modelMapper.typeMap(OrderDTO.class, Order.class).addMappings(mapper -> mapper.skip(Order::setId));
+        modelMapper.typeMap(OrderDTO.class, Order.class).addMappings(mapping -> mapping.skip(Order::setId));
         // Cập nhật các trường của đơn hàng từ orderDTO
         Order order = new Order();
         modelMapper.map(orderDTO,order);

@@ -36,8 +36,6 @@ public class OrderDetailService implements IOrderDetailService{
                 .product(product)
                 .price(orderDetailDTO.getPrice())
                 .numberOfProducts(orderDetailDTO.getNumberOfProducts())
-                .totalPrice(orderDetailDTO.getTotalPrice())
-                .color(orderDetailDTO.getColor())
                 .build();
         orderDetailRepository.save(orderDetail);
         return modelMapper.map(orderDetail,OrderDetailResponse.class);
@@ -59,9 +57,7 @@ public class OrderDetailService implements IOrderDetailService{
 
         existOrderDetail.setOrder(order);
         existOrderDetail.setProduct(product);
-        existOrderDetail.setColor(orderDetailDTO.getColor());
         existOrderDetail.setNumberOfProducts(orderDetailDTO.getNumberOfProducts());
-        existOrderDetail.setTotalPrice(orderDetailDTO.getTotalPrice());
         existOrderDetail.setPrice(orderDetailDTO.getPrice());
 
         orderDetailRepository.save(existOrderDetail);

@@ -33,10 +33,4 @@ public class OrderDetail {
 
     @Column(name = "number_of_products",nullable = false)
     private int numberOfProducts;
-
-    @Column(name = "total_price",nullable = false)
-    private Float totalPrice;
-
-    @Column(name = "color")
-    private String color;
 }
