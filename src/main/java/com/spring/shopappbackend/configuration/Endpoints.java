@@ -45,7 +45,8 @@ public class Endpoints {
             "api/v1/orders/{id}",
             "api/v1/order-details/{id}",
             "api/v1/products/{id}",
-            "api/v1/users/admin/{id}"
+            "api/v1/users/admin/{id}",
+            "api/v1/products/delete/{imageName}"
     };
     public static String[] USER_GET_ENDPOINTS = {
 

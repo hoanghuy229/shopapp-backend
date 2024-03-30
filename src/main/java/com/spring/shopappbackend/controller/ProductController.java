@@ -114,7 +114,7 @@ public class ProductController {
             }
             Product newProduct = iProductService.createProduct(productDTO);
 
-            return ResponseEntity.ok(newProduct);
+            return ResponseEntity.ok("add success "+newProduct.getId());
 
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -169,6 +169,20 @@ public class ProductController {
         }
     }
 
+    @DeleteMapping("delete/{imageName}")
+    public ResponseEntity<?> deleteImageOfProduct(@PathVariable("imageName") String imageName) throws Exception {
+        try{
+            Path imagePath = Paths.get("uploads");
+            Path destination = Paths.get(imagePath.toString(),imageName);
+            Files.deleteIfExists(destination);
+            String result = iProductService.deleteProductImage(imageName);
+            return ResponseEntity.ok().body(result);
+        }
+        catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/images/{imageName}")
     public ResponseEntity<?> viewImage(@PathVariable String imageName){
         try {
@@ -202,6 +216,7 @@ public class ProductController {
         Files.copy(file.getInputStream(),destination, StandardCopyOption.REPLACE_EXISTING);
         return uniqueFileName;
     }
+
 
     //@PostMapping("/generateFakeProducts")
 //    public ResponseEntity<String> generateFakeProducts() throws DataNotFoundException {

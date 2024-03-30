@@ -24,4 +24,6 @@ public interface IProductService {
     ProductImage createProductImages(long id, ProductImageDTO productImageDTO) throws Exception;
 
     Page<ProductResponse> getCarousel(PageRequest pageRequest);
+
+    String deleteProductImage(String imageName) throws DataNotFoundException;
 }

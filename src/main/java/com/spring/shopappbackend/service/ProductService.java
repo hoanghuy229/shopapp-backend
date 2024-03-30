@@ -118,12 +118,35 @@ public class ProductService implements IProductService{
         if(size >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT + 1){
             throw new InvalidParamException("Number of images must <= 5");
         }
-        return productImageRepository.save(newPImage);
+        ProductImage productImage = productImageRepository.save(newPImage);
+        if(existProduct.getThumbnail() == null || existProduct.getThumbnail().isEmpty()){
+            existProduct.setThumbnail(productImage.getImageUrl());
+            productRepository.save(existProduct);
+        }
+        return productImage;
     }
 
     @Override
     public Page<ProductResponse> getCarousel(PageRequest pageRequest) {
         Page<Product> products = productRepository.getCarousel(pageRequest);
         return products.map(product -> modelMapper.map(product,ProductResponse.class));
+    }
+
+    @Override
+    @Transactional
+    public String deleteProductImage(String imageName) throws DataNotFoundException {
+        ProductImage productImage = productImageRepository.getProductImageByImageUrl(imageName);
+        if(productImage == null){
+            throw new DataNotFoundException("image not found in db !!!");
+        }
+
+        Product product = productRepository.getProductByImageUrl(imageName);
+        if(product != null){
+            product.setThumbnail(null);
+            productRepository.save(product);
+        }
+
+        productImageRepository.deleteById(productImage.getId());
+        return "delete success";
     }
 }
