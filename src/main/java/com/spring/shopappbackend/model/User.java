@@ -27,7 +27,7 @@ public class User extends BaseModel implements UserDetails {
     @Column(name = "fullname",length = 100)
     private String fullName;
 
-    @Column(name = "phone_number",length = 20,nullable = false)
+    @Column(name = "phone_number",length = 100,nullable = false)
     private String phoneNumber;
 
     @Column(name = "address",length = 200)
@@ -43,10 +43,10 @@ public class User extends BaseModel implements UserDetails {
     private Date dateOfBirth;
 
     @Column(name = "facebook_account_id")
-    private int facebookAccountId;
+    private String facebookAccountId;
 
     @Column(name = "google_account_id")
-    private int googleAccountId;
+    private String googleAccountId;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

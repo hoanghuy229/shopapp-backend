@@ -13,6 +13,18 @@ spring:
         hibernate:
           dialect: org.hibernate.dialect.MySQL8Dialect
           form_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 871380307707-irun55qjvsmn9rju06rt1ncr7b6rp5bd.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: http://localhost:3000
+            scope: email
+
+
+
 
   servlet:
     multipart:
@@ -35,3 +47,5 @@ twilio:
   accountSid: AC4035f8058daec4653fa539fa0324fcfa
   authToken: ce549b13564728d8db5a9d196dc0bd65
   phoneNumber: +14242926164
+
+

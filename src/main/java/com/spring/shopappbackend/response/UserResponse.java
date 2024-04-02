@@ -34,10 +34,10 @@ public class UserResponse {
     private Date DateOfBirth;
 
     @JsonProperty("facebook_account_id")
-    private int faceBookAccountId;
+    private String faceBookAccountId;
 
     @JsonProperty("google_account_id")
-    private int googleAccountId;
+    private String googleAccountId;
 
     @JsonProperty("role")
     private Role role;

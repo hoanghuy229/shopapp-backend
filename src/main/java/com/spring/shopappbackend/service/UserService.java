@@ -1,10 +1,7 @@
 package com.spring.shopappbackend.service;
 
 import com.spring.shopappbackend.component.JwtTokenUtil;
-import com.spring.shopappbackend.dto.PasswordDTO;
-import com.spring.shopappbackend.dto.PhoneNumberDTO;
-import com.spring.shopappbackend.dto.UpdateUserDTO;
-import com.spring.shopappbackend.dto.UserDTO;
+import com.spring.shopappbackend.dto.*;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.exception.InvalidParamException;
 import com.spring.shopappbackend.exception.PermissionException;
@@ -25,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 @Service
@@ -65,7 +63,7 @@ public class UserService implements IUserService{
         newUser.setActive(true);
         newUser.setRole(role);
         //check account id , if dont have require password
-        if(userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0){
+        if(userDTO.getFacebookAccountId().equals("0") && userDTO.getGoogleAccountId().equals("0")){
             String password = userDTO.getPassword();
             String encodePassword = passwordEncoder.encode(password);
             newUser.setPassword(encodePassword);
@@ -80,7 +78,7 @@ public class UserService implements IUserService{
             throw new DataNotFoundException("invalid information !!!");
         }
         User existUser = user.get();
-        if(existUser.getFacebookAccountId() == 0 && existUser.getGoogleAccountId() == 0){
+        if(existUser.getFacebookAccountId().equals("0") && existUser.getGoogleAccountId().equals("0")){
            if(!passwordEncoder.matches(password,existUser.getPassword())){
                throw new DataNotFoundException("invalid information !!!");
            }
@@ -147,10 +145,10 @@ public class UserService implements IUserService{
         if (updateUserDTO.getDateOfBirth() != null) {
             existUser.setDateOfBirth(updateUserDTO.getDateOfBirth());
         }
-        if (updateUserDTO.getFacebookAccountId() > 0) {
+        if (!updateUserDTO.getFacebookAccountId().equals("0")) {
             existUser.setFacebookAccountId(updateUserDTO.getFacebookAccountId());
         }
-        if (updateUserDTO.getGoogleAccountId() > 0) {
+        if (!updateUserDTO.getGoogleAccountId().equals("0")) {
             existUser.setGoogleAccountId(updateUserDTO.getGoogleAccountId());
         }
 
@@ -166,6 +164,7 @@ public class UserService implements IUserService{
     }
 
     @Override
+    @Transactional
     public void resetPassword(PasswordDTO passwordDTO,String phoneNumber) throws Exception {
         // Lấy thông tin người dùng từ DTO
         User user = userRepository.findByPhoneNumber(phoneNumber).orElseThrow(() -> new DataNotFoundException("User not found"));
@@ -184,5 +183,35 @@ public class UserService implements IUserService{
         return users.map(user -> {
             return modelMapper.map(user,UserResponse.class);
         });
+    }
+
+    @Override
+    @Transactional
+    public String GoogleLogin(SocialAccountDTO socialAccountDTO) throws DataNotFoundException, PermissionException, InvalidParamException {
+        User userExist = userRepository.findByGoogleAccountId(socialAccountDTO.getGoogleAccountId());
+        Role role = roleRepository.findById(socialAccountDTO.getRoleId()).orElseThrow(() -> new DataNotFoundException("Role not found"));
+        if(role.getName().equals("ROLE_ADMIN")){
+            throw new PermissionException("cannot register with role admin");
+        }
+
+        if(userExist == null){
+            //tạo mới
+            User newUser = User.builder()
+                    .fullName(socialAccountDTO.getFullName())
+                    .phoneNumber(socialAccountDTO.getEmail())
+                    .facebookAccountId("0")
+                    .googleAccountId(socialAccountDTO.getGoogleAccountId())
+                    .build();
+            newUser.setActive(true);
+            newUser.setRole(role);
+            String passFake = passwordEncoder.encode(socialAccountDTO.getFullName());
+            newUser.setPassword(passFake);
+            userRepository.save(newUser);
+
+            return jwtTokenUtil.generateToken(newUser);
+        }
+        else{
+            return jwtTokenUtil.generateToken(userExist);
+        }
     }
 }

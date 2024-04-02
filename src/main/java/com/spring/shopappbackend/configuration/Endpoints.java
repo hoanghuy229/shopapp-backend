@@ -9,12 +9,13 @@ public class Endpoints {
             "api/v1/categories",
             "api/v1/roles",
             "api/v1/products/images/*",
-            "api/v1/comments",
+            "api/v1/comments"
     };
     public static String[] PUBLIC_POST_ENDPOINTS = {
             "api/v1/users/register",
             "api/v1/users/login",
             "api/v1/users/otp/*",
+            "api/v1/social/*"
     };
     public static String[] ADMIN_USER_GET_ENDPOINTS = {
             "api/v1/order-details/{id}",

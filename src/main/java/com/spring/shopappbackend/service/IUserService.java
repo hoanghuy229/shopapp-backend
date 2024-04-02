@@ -1,9 +1,6 @@
 package com.spring.shopappbackend.service;
 
-import com.spring.shopappbackend.dto.PasswordDTO;
-import com.spring.shopappbackend.dto.PhoneNumberDTO;
-import com.spring.shopappbackend.dto.UpdateUserDTO;
-import com.spring.shopappbackend.dto.UserDTO;
+import com.spring.shopappbackend.dto.*;
 import com.spring.shopappbackend.exception.DataNotFoundException;
 import com.spring.shopappbackend.exception.InvalidParamException;
 import com.spring.shopappbackend.exception.PermissionException;
@@ -29,4 +26,5 @@ public interface IUserService {
     void resetPassword(PasswordDTO passwordDTO, String phoneNumber) throws Exception;
 
     Page<UserResponse> findByKeyword(String keyword, PageRequest pageRequest);
+    String GoogleLogin(SocialAccountDTO socialAccountDTO) throws DataNotFoundException, PermissionException, InvalidParamException;
 }
